@@ -1,92 +1,111 @@
-"""Начальный сценарий сервиса учёта поставок.
+"""Точка запуска приложения и основной сценарий взаимодействия."""
+from typing import List, Dict, Any
 
-Реализует три функции, описанные в README.md:
-    - validate_delivery — проверка корректности данных поставки;
-    - calculate_total_cost — расчёт итоговой стоимости поставки;
-    - get_delivery_status — определение статуса поставки.
-"""
-
-from datetime import date
-
-
-def validate_delivery(
-    supplier_name: str,
-    product_name: str,
-    quantity: int,
-    price: float,
-) -> bool:
-    """Проверяет корректность данных поставки.
-
-    Args:
-        supplier_name: название поставщика.
-        product_name: название товара.
-        quantity: количество единиц товара.
-        price: цена за единицу товара.
-
-    Returns:
-        True, если данные корректны, иначе False.
-    """
-    if not supplier_name or not product_name:
-        return False
-    if quantity <= 0:
-        return False
-    if price <= 0:
-        return False
-    return True
+from deliveries import (
+    add_delivery,
+    find_delivery,
+    filter_deliveries_by_status,
+    sort_deliveries_by_date,
+    validate_delivery,
+)
+from storage import load_deliveries, save_deliveries
+from utils import input_int, input_float, input_date, input_yes_no
 
 
-def calculate_total_cost(quantity: int, price: float) -> float:
-    """Считает итоговую стоимость поставки.
+def show_deliveries(deliveries: List[Dict[str, Any]]) -> None:
+    """Вывести список всех поставок в виде таблицы."""
+    if not deliveries:
+        print("Список поставок пуст.")
+        return
+    
+    header = "{:<5} | {:<20} | {:<25} | {:<8} | {:<10} | {:<12} | {:<25}"
+    print(header.format("ID", "Поставщик", "Товар", "Кол-во", "Цена", "Стоимость", "Статус"))
+    print("-" * 115)
+    for d in deliveries:
+        print(header.format(
+            d["id"], d["supplier_name"][:20], d["product_name"][:25], 
+            d["quantity"], d["price"], d["total_cost"], d["status"]
+        ))
+    print()
 
-    Args:
-        quantity: количество единиц товара.
-        price: цена за единицу товара.
 
-    Returns:
-        Итоговая стоимость поставки.
-    """
-    return quantity * price
-
-
-def get_delivery_status(is_valid: bool, is_paid: bool) -> str:
-    """Определяет статус поставки.
-
-    Args:
-        is_valid: прошла ли поставка валидацию.
-        is_paid: оплачена ли поставка.
-
-    Returns:
-        Строка со статусом поставки.
-    """
-    if not is_valid:
-        return "Поставка отклонена: некорректные данные"
-    if not is_paid:
-        return "Поставка ожидает оплаты"
-    return "Поставка принята на склад"
+def show_delivery_details(delivery: Dict[str, Any]) -> None:
+    """Вывести подробную информацию о поставке."""
+    print("\n--- Детали поставки ---")
+    print(f"ID: {delivery['id']}")
+    print(f"Поставщик: {delivery['supplier_name']}")
+    print(f"Товар: {delivery['product_name']}")
+    print(f"Количество: {delivery['quantity']} шт.")
+    print(f"Цена за единицу: {delivery['price']:.2f} руб.")
+    print(f"Итоговая стоимость: {delivery['total_cost']:.2f} руб.")
+    print(f"Дата поставки: {delivery['delivery_date']}")
+    print(f"Оплачено: {'Да' if delivery['is_paid'] else 'Нет'}")
+    print(f"Статус: {delivery['status']}\n")
 
 
 def main() -> None:
-    """Запускает демонстрационный сценарий учёта поставки."""
-    supplier_name = "ООО Ромашка"
-    product_name = "Кабель UTP cat.5e"
-    quantity = 500
-    price = 24.5
-    is_paid = True
-    delivery_date = date(2026, 9, 15)
+    """Точка запуска приложения."""
+    deliveries = load_deliveries()
+    
+    # Генерация следующего ID с использованием генератора (расширенная возможность Python)
+    next_id = max((d["id"] for d in deliveries), default=0) + 1
 
-    is_valid = validate_delivery(
-        supplier_name, product_name, quantity, price
-    )
-    total_cost = calculate_total_cost(quantity, price)
-    status = get_delivery_status(is_valid, is_paid)
-
-    print(f"Поставщик: {supplier_name}")
-    print(f"Товар: {product_name}")
-    print(f"Количество: {quantity} шт.")
-    print(f"Цена за единицу: {price:.2f} руб.")
-    print(f"Дата поставки: {delivery_date}")
-    print(f"Итоговая стоимость: {total_cost:.2f} руб.")
-    print(f"Статус: {status}")
+    while True:
+        print("\n=== Система учёта поставок ===")
+        print("1. Показать все поставки")
+        print("2. Добавить новую поставку")
+        print("3. Найти поставку по названию")
+        print("4. Показать поставки по статусу")
+        print("5. Показать поставки, отсортированные по дате")
+        print("0. Выход")
+        
+        choice = input("Выберите действие: ").strip()
+        
+        if choice == "1":
+            show_deliveries(deliveries)
+        elif choice == "2":
+            supplier = input("Название поставщика: ").strip()
+            product = input("Название товара: ").strip()
+            quantity = input_int("Количество: ")
+            price = input_float("Цена за единицу: ")
+            date_str = input_date("Дата поставки (ДД.ММ.ГГГГ): ")
+            is_paid = input_yes_no("Оплачено? (да/нет): ")
+            
+            if not validate_delivery(supplier, product, quantity, price):
+                print("Ошибка: некорректные данные поставки (проверьте названия, количество и цену > 0).")
+                continue
+                
+            add_delivery(deliveries, next_id, supplier, product, quantity, price, date_str, is_paid)
+            print(f"Поставка с ID {next_id} успешно добавлена.")
+            next_id += 1
+            save_deliveries(deliveries)
+        elif choice == "3":
+            query = input("Введите строку для поиска (поставщик или товар): ").strip()
+            found = find_delivery(deliveries, query)
+            if found:
+                print(f"\nНайдено поставок: {len(found)}")
+                for d in found:
+                    show_delivery_details(d)
+            else:
+                print("Поставки не найдены.")
+        elif choice == "4":
+            print("Доступные статусы: 'Поставка принята на склад', 'Поставка ожидает оплаты', 'Поставка отклонена: некорректные данные'")
+            status = input("Введите статус для фильтрации: ").strip()
+            filtered = filter_deliveries_by_status(deliveries, status)
+            if filtered:
+                show_deliveries(filtered)
+            else:
+                print("Поставки с таким статусом не найдены.")
+        elif choice == "5":
+            sorted_deliveries = sort_deliveries_by_date(deliveries)
+            show_deliveries(sorted_deliveries)
+        elif choice == "0":
+            print("Сохранение данных и выход...")
+            save_deliveries(deliveries)
+            print("До свидания!")
+            break
+        else:
+            print("Неверный выбор. Попробуйте снова.")
 
 
 if __name__ == "__main__":
