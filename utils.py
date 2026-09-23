@@ -6,20 +6,18 @@ def input_int(prompt: str) -> int:
     """Запросить у пользователя целое число."""
     while True:
         try:
-            value = int(input(prompt))
-            return value
+            return int(input(prompt))
         except ValueError:
-            print("Ошибка: введите корректное целое число.")
+            print("Ошибка: введите целое число.")
 
 
 def input_float(prompt: str) -> float:
     """Запросить у пользователя число с плавающей точкой."""
     while True:
         try:
-            value = float(input(prompt))
-            return value
+            return float(input(prompt))
         except ValueError:
-            print("Ошибка: введите корректное число.")
+            print("Ошибка: введите число.")
 
 
 def input_date(prompt: str) -> str:
@@ -30,7 +28,7 @@ def input_date(prompt: str) -> str:
             datetime.strptime(date_str, "%d.%m.%Y")
             return date_str
         except ValueError:
-            print("Ошибка: введите дату в формате ДД.ММ.ГГГГ (например, 15.09.2026).")
+            print("Ошибка: формат ДД.ММ.ГГГГ.")
 
 
 def input_yes_no(prompt: str) -> bool:
@@ -39,7 +37,6 @@ def input_yes_no(prompt: str) -> bool:
         choice = input(prompt).strip().lower()
         if choice in ("да", "y", "yes"):
             return True
-        elif choice in ("нет", "n", "no"):
+        if choice in ("нет", "n", "no"):
             return False
-        else:
-            print("Ошибка: введите 'да' или 'нет'.")
+        print("Ошибка: введите 'да' или 'нет'.")
