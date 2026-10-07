@@ -96,6 +96,17 @@ def find_delivery(deliveries: List[Delivery], query: str) -> List[Delivery]:
     ]
 
 
+def find_delivery_by_id(
+    deliveries: List[Delivery],
+    delivery_id: int,
+) -> Optional[Delivery]:
+    """Найти поставку по идентификатору."""
+    for delivery in deliveries:
+        if delivery.id == delivery_id:
+            return delivery
+    return None
+
+
 def filter_deliveries_by_status(deliveries: List[Delivery], status: str) -> List[Delivery]:
     """Отфильтровать поставки по статусу."""
     return [d for d in deliveries if d.get_status() == status]

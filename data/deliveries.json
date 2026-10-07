@@ -1,0 +1,56 @@
+[
+    {
+        "id": 1,
+        "supplier_id": 1,
+        "product_id": 1,
+        "quantity": 500,
+        "delivery_date": "15.09.2026",
+        "is_paid": true,
+        "is_cancelled": false
+    },
+    {
+        "id": 2,
+        "supplier_id": 2,
+        "product_id": 3,
+        "quantity": 1000,
+        "delivery_date": "20.09.2026",
+        "is_paid": false,
+        "is_cancelled": false
+    },
+    {
+        "id": 3,
+        "supplier_id": 3,
+        "product_id": 5,
+        "quantity": 10,
+        "delivery_date": "25.09.2026",
+        "is_paid": true,
+        "is_cancelled": false
+    },
+    {
+        "id": 4,
+        "supplier_id": 1,
+        "product_id": 2,
+        "quantity": 200,
+        "delivery_date": "01.10.2026",
+        "is_paid": false,
+        "is_cancelled": true
+    },
+    {
+        "id": 5,
+        "supplier_id": 2,
+        "product_id": 4,
+        "quantity": 50,
+        "delivery_date": "05.10.2026",
+        "is_paid": true,
+        "is_cancelled": false
+    },
+    {
+        "id": 6,
+        "supplier_id": 3,
+        "product_id": 1,
+        "quantity": 300,
+        "delivery_date": "10.10.2026",
+        "is_paid": false,
+        "is_cancelled": false
+    }
+]
