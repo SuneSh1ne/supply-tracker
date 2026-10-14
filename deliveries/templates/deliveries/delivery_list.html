@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}
+Поставки – Supply Tracker
+{% endblock %}
+
+{% block content %}
+<h1>Поставки</h1>
+<p>Всего поставок: {{ deliveries|length }}</p>
+
+<div class="list-group">
+    {% for delivery in deliveries %}
+    {% include "deliveries/includes/delivery_card.html" %}
+    {% empty %}
+    <p class="list-group-item">Поставки не найдены.</p>
+    {% endfor %}
+</div>
+{% endblock %}

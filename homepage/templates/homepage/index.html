@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}
+Главная – Supply Tracker
+{% endblock %}
+
+{% block content %}
+<h1 class="display-4">Supply Tracker</h1>
+<p class="lead">Сервис учёта поставок товаров на склад.</p>
+<p>Приложение позволяет отслеживать поставки от поставщиков,
+контролировать количество и стоимость товаров.</p>
+<a href="{% url 'deliveries:list' %}" class="btn btn-primary me-2">Поставки</a>
+<a href="{% url 'suppliers:list' %}" class="btn btn-secondary me-2">Поставщики</a>
+<a href="{% url 'products:list' %}" class="btn btn-outline-secondary">Товары</a>
+{% endblock %}

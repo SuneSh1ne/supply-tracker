@@ -1,0 +1,13 @@
+<article class="card supplier-card mb-3">
+    <div class="card-body">
+        <h2 class="card-title">
+            {{ supplier.name|default:"Без названия" }}
+        </h2>
+        <p class="card-text">
+            ID: {{ supplier.id }}
+        </p>
+        <a href="{% url 'suppliers:detail' supplier.id %}" class="btn btn-primary">
+            Подробнее
+        </a>
+    </div>
+</article>

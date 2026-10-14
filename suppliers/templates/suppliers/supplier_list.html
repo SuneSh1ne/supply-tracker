@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}
+Поставщики – Supply Tracker
+{% endblock %}
+
+{% block content %}
+<h1>Поставщики</h1>
+<p>Всего поставщиков: {{ suppliers|length }}</p>
+
+<div class="list-group">
+    {% for supplier in suppliers %}
+    {% include "suppliers/includes/supplier_card.html" %}
+    {% empty %}
+    <p class="list-group-item">Поставщики не найдены.</p>
+    {% endfor %}
+</div>
+{% endblock %}

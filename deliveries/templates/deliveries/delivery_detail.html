@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if delivery %}
+Поставка #{{ delivery.id }} – Supply Tracker
+{% else %}
+Поставка не найдена – Supply Tracker
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% if delivery %}
+<div class="card">
+    <div class="card-body">
+        <h1 class="card-title">Поставка #{{ delivery.id }}</h1>
+        <p class="card-text">
+            <strong>Поставщик:</strong>
+            {{ delivery.supplier.name }}
+        </p>
+        <p class="card-text">
+            <strong>Товар:</strong>
+            {{ delivery.product.name }}
+        </p>
+        <p class="card-text">
+            <strong>Количество:</strong>
+            {{ delivery.quantity }} шт.
+        </p>
+        <p class="card-text">
+            <strong>Цена за единицу:</strong>
+            {{ delivery.product.price }} руб.
+        </p>
+        <p class="card-text">
+            <strong>Итоговая стоимость:</strong>
+            {{ delivery.calculate_total_cost }} руб.
+        </p>
+        <p class="card-text">
+            <strong>Дата поставки:</strong>
+            {{ delivery.delivery_date }}
+        </p>
+        <p class="card-text">
+            <strong>Оплачено:</strong>
+            {% if delivery.is_paid %}Да{% else %}Нет{% endif %}
+        </p>
+        <p class="card-text">
+            <strong>Статус:</strong>
+            {% include "deliveries/includes/delivery_status.html" %}
+        </p>
+    </div>
+</div>
+{% else %}
+<h1 class="text-danger">Поставка не найдена</h1>
+<p>Поставка с указанным идентификатором отсутствует.</p>
+{% endif %}
+
+<a href="{% url 'deliveries:list' %}" class="btn btn-outline-secondary mt-3">
+    ← к списку поставок
+</a>
+{% endblock %}

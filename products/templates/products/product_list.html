@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}
+Товары – Supply Tracker
+{% endblock %}
+
+{% block content %}
+<h1>Товары</h1>
+<p>Всего товаров: {{ products|length }}</p>
+
+<div class="list-group">
+    {% for product in products %}
+    {% include "products/includes/product_card.html" %}
+    {% empty %}
+    <p class="list-group-item">Товары не найдены.</p>
+    {% endfor %}
+</div>
+{% endblock %}

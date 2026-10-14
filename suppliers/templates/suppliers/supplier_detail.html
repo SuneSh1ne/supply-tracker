@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if supplier %}
+{{ supplier.name }} – Supply Tracker
+{% else %}
+Поставщик не найден – Supply Tracker
+{% endif %}
+{% endblock %}
+
+{% block content %}
+{% if supplier %}
+<div class="card">
+    <div class="card-body">
+        <h1 class="card-title">{{ supplier.name }}</h1>
+        <p class="card-text">
+            <strong>ID:</strong> {{ supplier.id }}
+        </p>
+    </div>
+</div>
+{% else %}
+<h1 class="text-danger">Поставщик не найден</h1>
+<p>Поставщик с указанным идентификатором отсутствует.</p>
+{% endif %}
+
+<a href="{% url 'suppliers:list' %}" class="btn btn-outline-secondary mt-3">
+    ← к списку поставщиков
+</a>
+{% endblock %}

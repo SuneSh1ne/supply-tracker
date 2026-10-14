@@ -1,0 +1,22 @@
+body {
+    min-height: 100vh;
+}
+
+.delivery-card,
+.supplier-card,
+.product-card {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.delivery-status {
+    font-weight: 600;
+}
+
+.supply-tracker-logo {
+    width: 120px;
+    height: auto;
+    margin: 1rem 0;
+}

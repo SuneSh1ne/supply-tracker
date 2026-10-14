@@ -1,0 +1,13 @@
+{% if delivery.is_cancelled %}
+<span class="badge bg-secondary delivery-status delivery-status-cancelled">
+    Отменена
+</span>
+{% elif not delivery.is_paid %}
+<span class="badge bg-warning text-dark delivery-status delivery-status-pending">
+    Ожидает оплаты
+</span>
+{% else %}
+<span class="badge bg-success delivery-status delivery-status-active">
+    Принята на склад
+</span>
+{% endif %}
