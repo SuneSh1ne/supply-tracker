@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}
+Ошибка сервера – Supply Tracker
+{% endblock %}
+
+{% block content %}
+<h1 class="text-danger">Ошибка сервера</h1>
+<p>
+    Что-то пошло не так при обработке запроса.
+    Попробуйте обновить страницу позже.
+</p>
+<a href="{% url 'homepage:index' %}" class="btn btn-outline-secondary">
+    ← на главную
+</a>
+{% endblock %}

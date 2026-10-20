@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}
+Не найдено – Supply Tracker
+{% endblock %}
+
+{% block content %}
+<h1 class="text-danger">Не найдено</h1>
+<p>
+    Запрошенный объект не существует: идентификатор некорректен
+    или запись с таким идентификатором отсутствует.
+</p>
+<p>
+    Проверьте адрес: <code>{{ request_path }}</code>
+</p>
+<a href="{% url 'homepage:index' %}" class="btn btn-outline-secondary">
+    ← на главную
+</a>
+{% endblock %}

@@ -265,62 +265,176 @@ Django ORM на текущем этапе не используется.
 
 ```text
 supply-tracker/
-├── manage.py
-├── supplytracker/
+├── manage.py                 # точка входа Django
+├── main.py                   # консольная версия приложения (ПР3)
+├── storage.py                # загрузка и сохранение JSON (ПР3)
+├── utils.py                  # функции безопасного ввода (ПР3)
+├── conftest.py               # конфигурация pytest (корень проекта в sys.path)
+├── requirements.txt
+├── README.md
+├── .flake8
+├── .gitignore
+│
+├── supplytracker/            # пакет настроек Django-проекта
+│   ├── __init__.py
 │   ├── settings.py
 │   ├── urls.py
 │   ├── asgi.py
 │   └── wsgi.py
-├── templates/
+│
+├── templates/                # шаблоны уровня проекта
 │   ├── base.html
+│   ├── 404.html
+│   ├── 500.html
 │   └── includes/
 │       └── navigation.html
-├── homepage/
-│   ├── static/homepage/
-│   │   ├── css/style.css
-│   │   ├── js/main.js
-│   │   └── img/logo.png
-│   ├── templates/homepage/
-│   │   └── index.html
+│
+├── homepage/                 # приложение: главная страница и статика
+│   ├── migrations/
+│   ├── static/
+│   │   └── homepage/
+│   │       ├── css/style.css
+│   │       ├── js/main.js
+│   │       └── img/logo.png
+│   ├── templates/
+│   │   └── homepage/
+│   │       └── index.html
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── tests.py
 │   ├── urls.py
 │   └── views.py
-├── deliveries/
-│   ├── templates/deliveries/
-│   │   ├── delivery_list.html
-│   │   ├── delivery_detail.html
-│   │   └── includes/
-│   │       ├── delivery_card.html
-│   │       └── delivery_status.html
+│
+├── deliveries/               # приложение: поставки
+│   ├── migrations/
+│   ├── templates/
+│   │   └── deliveries/
+│   │       ├── delivery_list.html
+│   │       ├── delivery_detail.html
+│   │       ├── available.html
+│   │       ├── statistics.html
+│   │       └── includes/
+│   │           └── delivery_status.html
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── tests.py
 │   ├── urls.py
 │   └── views.py
-├── suppliers/
-│   ├── templates/suppliers/
-│   │   ├── supplier_list.html
-│   │   ├── supplier_detail.html
-│   │   └── includes/
-│   │       └── supplier_card.html
+│
+├── suppliers/                # приложение: поставщики
+│   ├── migrations/
+│   ├── templates/
+│   │   └── suppliers/
+│   │       ├── supplier_list.html
+│   │       └── supplier_detail.html
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── tests.py
 │   ├── urls.py
 │   └── views.py
-├── products/
-│   ├── templates/products/
-│   │   ├── product_list.html
-│   │   ├── product_detail.html
-│   │   └── includes/
-│   │       └── product_card.html
+│
+├── products/                 # приложение: товары
+│   ├── migrations/
+│   ├── templates/
+│   │   └── products/
+│   │       ├── product_list.html
+│   │       └── product_detail.html
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── tests.py
 │   ├── urls.py
 │   └── views.py
-├── models/
+│
+├── models/                   # классы предметной области (ПР3)
+│   ├── __init__.py
 │   ├── suppliers.py
 │   ├── products.py
 │   └── deliveries.py
-├── data/
+│
+├── db/                       # слой подключения к SQLite (ПР7)
+│   ├── __init__.py
+│   ├── database.py
+│   └── import_json.py
+│
+├── sql/                      # SQL-скрипты проекта (ПР7)
+│   ├── schema.sql
+│   └── queries.sql
+│
+├── data/                     # данные приложения
 │   ├── suppliers.json
 │   ├── products.json
-│   └── deliveries.json
-├── tests/
-├── main.py
-├── storage.py
-├── utils.py
-├── conftest.py
-├── requirements.txt
-└── README.md
+│   ├── deliveries.json
+│   └── supplytracker.sqlite
+│
+└── tests/                    # автоматизированные тесты pytest
+    ├── __init__.py
+    ├── test_suppliers.py
+    ├── test_products.py
+    └── test_deliveries.py
+
+### Структура базы данных
+
+Три таблицы, связанные внешними ключами:
+
+| Таблица | Поля | Ключи |
+|---------|------|-------|
+| `suppliers` | `id INTEGER`, `name TEXT` | `PRIMARY KEY (id)` |
+| `products` | `id INTEGER`, `name TEXT`, `price REAL` | `PRIMARY KEY (id)` |
+| `deliveries` | `id INTEGER`, `supplier_id INTEGER`, `product_id INTEGER`, `quantity INTEGER`, `delivery_date TEXT`, `is_paid INTEGER`, `is_cancelled INTEGER` | `PRIMARY KEY (id)`, `FOREIGN KEY (supplier_id) REFERENCES suppliers(id)`, `FOREIGN KEY (product_id) REFERENCES products(id)` |
+
+### Файлы слоя БД
+
+- `sql/schema.sql` — SQL-скрипт создания таблиц;
+- `sql/queries.sql` — SQL-запросы проекта (13 запросов);
+- `db/database.py` — модуль подключения к SQLite (включает `PRAGMA foreign_keys = ON`);
+- `db/import_json.py` — скрипт однократного переноса данных из JSON;
+- `data/supplytracker.sqlite` — файл базы данных.
+
+### SQL-запросы проекта
+
+В `sql/queries.sql` реализованы запросы всех требуемых видов:
+
+| № | Тип | Назначение |
+|---|-----|-----------|
+| 1 | SELECT | Список всех поставщиков |
+| 2 | SELECT + WHERE | Список товаров дороже 20 руб. |
+| 3 | SELECT + WHERE | Список активных поставок |
+| 4 | SELECT + WHERE | Список отменённых поставок |
+| 5 | JOIN | Полная информация о поставках (3 таблицы) |
+| 6 | JOIN + WHERE | Поставки конкретного поставщика |
+| 7 | GROUP BY | Количество поставок по статусам |
+| 8 | LEFT JOIN + GROUP BY | Количество поставок по поставщикам |
+| 9 | JOIN + SUM + GROUP BY | Общая стоимость по поставщикам |
+| 10 | JOIN + GROUP BY + HAVING | Поставщики с более чем 1 активной поставкой |
+| 11 | NOT IN + параметр `?` | Поиск поставок, не принятых на выбранную дату |
+| 12 | ORDER BY + LIMIT | Топ-3 самых дорогих товаров |
+| 13 | LEFT JOIN + IS NULL | Товары, по которым не было активных поставок |
+
+### Django-интеграция
+
+- В представлениях используется `sqlite3.Row` для доступа к полям по именам;
+- Значения передаются параметрами `?` (безопасные параметризованные запросы);
+- Результаты запросов передаются в шаблоны через `context`.
+
+### Страницы с данными из SQLite
+
+- `/deliveries/` — список поставок (JOIN трёх таблиц);
+- `/deliveries/available/` — поиск по дате (NOT IN + параметр);
+- `/deliveries/statistics/` — статистика (GROUP BY + SUM);
+- `/suppliers/` — список поставщиков;
+- `/products/` — список товаров.
+
+### Импорт данных
+
+Перед первым запуском веб-интерфейса импортируйте данные:
+
+```bash
+python -m db.import_json

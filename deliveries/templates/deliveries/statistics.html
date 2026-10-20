@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}
+Статистика поставок – Supply Tracker
+{% endblock %}
+
+{% block content %}
+<h1>Статистика по поставщикам</h1>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Поставщик</th>
+            <th>Количество активных поставок</th>
+            <th>Общая стоимость, руб.</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in statistics %}
+        <tr>
+            <td>{{ item.supplier_name }}</td>
+            <td>{{ item.deliveries_count }}</td>
+            <td>{{ item.total_cost|floatformat:2 }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3">Данные отсутствуют.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{% url 'deliveries:list' %}" class="btn btn-outline-secondary">
+    ← к списку поставок
+</a>
+{% endblock %}

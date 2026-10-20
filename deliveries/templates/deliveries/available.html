@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}
+Поиск по дате – Supply Tracker
+{% endblock %}
+
+{% block content %}
+<h1>Поиск поставок по дате</h1>
+
+<form method="get" class="mb-4">
+    <label for="date" class="form-label">Дата поставки:</label>
+    <input type="text"
+           id="date"
+           name="date"
+           class="form-control d-inline-block w-auto"
+           placeholder="ДД.ММ.ГГГГ"
+           value="{{ delivery_date }}">
+    <button type="submit" class="btn btn-primary">Найти</button>
+</form>
+
+{% if error %}
+<p class="alert alert-danger">{{ error }}</p>
+{% endif %}
+
+{% if delivery_date and not error %}
+<h2>Активные поставки на {{ delivery_date }}</h2>
+<div class="list-group mb-4">
+    {% for delivery in deliveries_on_date %}
+    <article class="card mb-2">
+        <div class="card-body">
+            <h5>Поставка #{{ delivery.id }}</h5>
+            <p>Поставщик: {{ delivery.supplier_name }}</p>
+            <p>Товар: {{ delivery.product_name }}</p>
+            <p>Количество: {{ delivery.quantity }} шт.</p>
+        </div>
+    </article>
+    {% empty %}
+    <p class="alert alert-info">
+        На эту дату активных поставок нет.
+    </p>
+    {% endfor %}
+</div>
+
+<h2>Поставщики без поставок на {{ delivery_date }}</h2>
+<div class="list-group">
+    {% for supplier in free_suppliers %}
+    <p class="list-group-item">{{ supplier.name }}</p>
+    {% empty %}
+    <p class="alert alert-info">
+        У всех поставщиков есть поставки на эту дату.
+    </p>
+    {% endfor %}
+</div>
+{% endif %}
+
+<a href="{% url 'deliveries:list' %}" class="btn btn-outline-secondary mt-3">
+    ← к списку поставок
+</a>
+{% endblock %}

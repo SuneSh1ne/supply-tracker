@@ -7,10 +7,48 @@
 {% block content %}
 <h1>Поставки</h1>
 <p>Всего поставок: {{ deliveries|length }}</p>
+<p>
+    <a href="{% url 'deliveries:available' %}" class="btn btn-outline-primary">
+        Поиск по дате
+    </a>
+    <a href="{% url 'deliveries:statistics' %}" class="btn btn-outline-secondary">
+        Статистика
+    </a>
+</p>
 
 <div class="list-group">
     {% for delivery in deliveries %}
-    {% include "deliveries/includes/delivery_card.html" %}
+    <article class="card delivery-card mb-3">
+        <div class="card-body">
+            <h2 class="card-title">
+                Поставка #{{ delivery.id }}:
+                {{ delivery.product_name|default:"Без названия" }}
+            </h2>
+            <p class="card-text">
+                Поставщик: {{ delivery.supplier_name|default:"Не указан" }}
+            </p>
+            <p class="card-text">
+                Количество: {{ delivery.quantity }} шт.
+            </p>
+            <p class="card-text">
+                Дата: {{ delivery.delivery_date }}
+            </p>
+            <p class="card-text">
+                Статус:
+                {% if delivery.is_cancelled %}
+                <span class="badge bg-secondary">Отменена</span>
+                {% elif not delivery.is_paid %}
+                <span class="badge bg-warning text-dark">Ожидает оплаты</span>
+                {% else %}
+                <span class="badge bg-success">Принята на склад</span>
+                {% endif %}
+            </p>
+            <a href="{% url 'deliveries:detail' delivery.id %}"
+               class="btn btn-primary">
+                Подробнее
+            </a>
+        </div>
+    </article>
     {% empty %}
     <p class="list-group-item">Поставки не найдены.</p>
     {% endfor %}
