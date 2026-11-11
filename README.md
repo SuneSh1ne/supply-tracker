@@ -1,440 +1,287 @@
 # Supply Tracker — сервис учёта поставок
 
-## Назначение
+Консольное и веб-приложение для учёта поступлений товаров на склад от поставщиков.
+Проект развивается поэтапно: консольная версия на Python дополнена веб-интерфейсом
+на Django, а слой доступа к данных переведён с JSON и ручных SQL-запросов на Django ORM.
 
-Supply Tracker – приложение для управления поставками товаров на склад.
-Консольная версия приложения (ПР3) дополнена веб-интерфейсом на Django (ПР5)
-и переведена на систему шаблонов Django (ПР6).
+## 1. Назначение проекта
+
+Supply Tracker — учебное приложение для складской логистики.
 
 Приложение позволяет:
-* просматривать поставки в браузере;
-* просматривать информацию о конкретной поставке;
-* просматривать список поставщиков и товаров;
-* просматривать информацию о поставщике и товаре;
-* отслеживать статус поставки (принята / ожидает оплаты / отменена);
+* просматривать поставки, поставщиков и товары в браузере;
+* просматривать подробную информацию о конкретной поставке, поставщике и товаре;
+* искать поставки по названию поставщика или товара;
+* фильтровать поставки по дате, поставщику, товару и цене товара;
+* сортировать список поставок по дате, поставщику, товару и количеству;
+* просматривать поставки постранично;
+* искать поставки и свободных поставщиков на выбранную дату;
+* просматривать статистику количества и стоимости поставок по поставщикам;
 * рассчитывать итоговую стоимость поставки;
-* добавлять поставки, поставщиков и товары (консольная версия);
-* отменять поставки (консольная версия);
-* искать поставки по названию поставщика или товара (консольная версия);
+* отслеживать статус поставки (принята / ожидает оплаты / отменена);
+* добавлять поставки, поставщиков и товары, отменять поставки (консольная версия);
 * хранить данные между запусками приложения.
 
-## Используемые технологии
+## 2. Используемые технологии
 
 * Python 3;
-* Django 5.2 – веб-фреймворк;
+* Django 5.2 — веб-фреймворк;
+* Django ORM — доступ к данным через модели;
+* SQLite — СУБД (целевая база `db.sqlite3`, исходная база ПР7 `data/supplytracker.sqlite`);
+* SQL — предыдущая реализация слоя данных (ПР7);
 * Django Template Language (DTL);
-* HTML5;
-* CSS3;
-* JavaScript;
+* HTML5, CSS3, JavaScript;
 * Bootstrap 5.3;
-* JSON для хранения данных;
+* JSON — исходное хранилище данных (ПР2–ПР6);
 * Git;
 * pytest;
 * flake8.
 
-## Целевая аудитория
+## 3. Предметная область
 
-* Кладовщики и сотрудники склада;
-* Менеджеры по закупкам;
-* Администраторы, ведущие справочники поставщиков и товаров.
-
-## Предметная область
-
-Основными объектами предметной области являются:
+Основные объекты предметной области:
 * поставщик;
 * товар;
 * поставка.
 
 Поставка связывает поставщика и товар: фиксирует факт поступления определённого
 количества товара от конкретного поставщика на указанную дату.
-Одна поставка относится к одному поставщику и одному товару.
-Отменённая поставка не удаляется из системы, а меняет статус — информация о ней сохраняется.
-
-## Основные сущности
-
-### Supplier – поставщик
-
-Объект `Supplier` представляет организацию, поставляющую товары.
-
-Основные атрибуты:
-* `id` – уникальный идентификатор поставщика;
-* `name` – название поставщика.
-
-Основные методы:
-* `__str__()` – строковое представление поставщика;
-* `from_data()` – создание объекта `Supplier` из набора данных.
-
-### Product – товар
-
-Объект `Product` представляет товар с фиксированной ценой за единицу.
-
-Основные атрибуты:
-* `id` – уникальный идентификатор товара;
-* `name` – название товара;
-* `price` – цена за единицу товара.
-
-Основные методы:
-* `validate_price()` – статическая проверка корректности цены;
-* `__str__()` – строковое представление товара;
-* `from_data()` – создание объекта `Product` из набора данных.
-
-### Delivery – поставка
-
-Объект `Delivery` представляет факт поступления товара от поставщика.
-
-Основные атрибуты:
-* `id` – уникальный идентификатор поставки;
-* `supplier` – объект `Supplier`;
-* `product` – объект `Product`;
-* `quantity` – количество единиц товара;
-* `delivery_date` – дата поставки;
-* `is_paid` – признак оплаты поставки;
-* `is_cancelled` – признак отмены поставки.
-
-Основные методы:
-* `calculate_total_cost()` – расчёт итоговой стоимости поставки;
-* `get_status()` – определение статуса поставки;
-* `cancel()` – отмена поставки;
-* `__str__()` – строковое представление поставки;
-* `from_data()` – создание объекта `Delivery` из набора данных.
-
-## Страницы веб-интерфейса
-
-* `/` – главная страница: описание приложения и навигация (view-функция `index()`);
-* `/deliveries/` – список поставок: объекты `Delivery` из `data/deliveries.json` (view-функция `deliveries_list()`);
-* `/deliveries/<int:delivery_id>/` – страница поставки (view-функция `delivery_detail()`);
-* `/suppliers/` – список поставщиков: объекты `Supplier` из `data/suppliers.json` (view-функция `suppliers_list()`);
-* `/suppliers/<int:supplier_id>/` – страница поставщика (view-функция `supplier_detail()`);
-* `/products/` – список товаров: объекты `Product` из `data/products.json` (view-функция `products_list()`);
-* `/products/<int:product_id>/` – страница товара (view-функция `product_detail()`).
-
-Если поставка, поставщик или товар с указанным идентификатором не найдены,
-соответствующая страница возвращает код статуса 404.
-
-## Веб-интерфейс
-
-Веб-часть приложения реализована на Django.
-
-Для формирования страниц используются Django-шаблоны.
-
-Генерация HTML непосредственно в Python-коде веб-представлений не используется.
-Функция `page()` больше не используется веб-представлениями.
-
-Представления подготавливают данные и передают их в шаблоны через контекст.
-
-## Django Template Language
-
-Шаблоны используют возможности Django Template Language.
-
-### Базовый шаблон
-
-Общий шаблон страниц: `templates/base.html`
-
-Он содержит общую HTML-структуру страницы, подключение стилей и JavaScript,
-навигацию и блоки для содержимого отдельных страниц.
-
-Дочерние шаблоны используют наследование:
-`{% extends "base.html" %}`
-
-Содержимое отдельных страниц размещается в блоке:
-`{% block content %}{% endblock %}`
-
-Заголовок страницы задаётся через блок:
-`{% block title %}{% endblock %}`
-
-### Включаемые шаблоны
-
-Повторяющиеся фрагменты вынесены в отдельные шаблоны.
-
-Для поставок используются:
-* `deliveries/includes/delivery_card.html`
-* `deliveries/includes/delivery_status.html`
-
-Для поставщиков используется:
-* `suppliers/includes/supplier_card.html`
-
-Для товаров используется:
-* `products/includes/product_card.html`
-
-Подключение выполняется с помощью:
-`{% include "deliveries/includes/delivery_card.html" %}`
-
-### Контекст
-
-Представления передают данные в шаблоны через словарь контекста.
-
-Например, для списка поставок:
-`context = {"deliveries": deliveries_list}`
-
-В шаблоне данные доступны по имени переменной:
-`{% for delivery in deliveries %}`
-
-Для страницы отдельной поставки используется переменная:
-`{{ delivery }}`
-
-### Циклы и условия
-
-Для формирования списков используются циклы:
-`{% for delivery in deliveries %}`
-
-При отсутствии элементов используется:
-`{% empty %}`
-
-Условия используются для отображения различного содержимого страницы и статуса поставки:
-`{% if delivery.is_cancelled %}`
-
-## Фильтры шаблонов
-
-В шаблонах используются стандартные фильтры Django Template Language.
-
-Количество элементов:
-`{{ deliveries|length }}`
-
-Для отображения значения по умолчанию:
-`{{ supplier.name|default:"Без названия" }}`
-
-Фильтры используются для представления данных и не содержат бизнес-логику приложения.
-
-Дата поставки на текущем этапе хранится как строковое значение и выводится без преобразования средствами шаблона.
-
-## URL-маршрутизация
-
-Для страниц используются именованные маршруты Django.
-
-Примеры:
-* `{% url 'deliveries:list' %}`
-* `{% url 'deliveries:detail' delivery.id %}`
-* `{% url 'suppliers:list' %}`
-* `{% url 'suppliers:detail' supplier.id %}`
-* `{% url 'products:list' %}`
-* `{% url 'products:detail' product.id %}`
-
-Для приложений используются пространства имён (namespace), что позволяет обращаться к маршрутам через имена вида:
-* `deliveries:list`
-* `deliveries:detail`
-* `suppliers:list`
-* `suppliers:detail`
-* `products:list`
-* `products:detail`
-
-Ссылки в шаблонах формируются через `{% url %}`, а не за счёт жёстко заданных адресов.
-
-## Статические файлы
-
-Статические файлы проекта находятся в каталоге:
-`homepage/static/homepage/`
-
-Используются:
-* `css/style.css`
-* `js/main.js`
-* `img/logo.png`
-
-Для работы со статическими файлами в шаблонах используется:
-`{% load static %}`
-
-CSS подключается через:
-`{% static 'homepage/css/style.css' %}`
-
-Изображение:
-`{% static 'homepage/img/logo.png' %}`
-
-JavaScript:
-`{% static 'homepage/js/main.js' %}`
-
-В проекте используется собственный CSS для оформления элементов интерфейса.
-
-JavaScript используется для небольшого динамического поведения интерфейса, в том числе для автоматического отображения текущего года в нижней части страницы.
-
-## Хранение данных
-
-Данные приложения хранятся в JSON-файлах:
-* `data/suppliers.json`;
-* `data/products.json`;
-* `data/deliveries.json`.
-
-При загрузке данные из JSON преобразуются в объекты `Supplier`, `Product` и `Delivery`.
-
-При сохранении объекты преобразуются в данные JSON.
-
-Для связи поставки с поставщиком и товаром в `deliveries.json` используются их
-идентификаторы `supplier_id` и `product_id`.
-
-Django ORM на текущем этапе не используется.
-
-## Структура проекта
+Одна поставка относится к одному поставщику и одному товару;
+один поставщик и один товар могут участвовать в нескольких поставках.
+Отменённая поставка не удаляется из системы, а меняет статус — информация о ней сохраняется
+и не учитывается в статистике и поиске свободных поставщиков.
+
+## 4. Основные сущности
+
+### Supplier — поставщик
+
+Консольный класс (`models/suppliers.py`) и модель Django (`suppliers/models.py`).
+
+Поля модели:
+* `id` — первичный ключ (создаётся Django автоматически);
+* `name` — название поставщика (`CharField`).
+
+Обратная связь: `supplier.deliveries.all()` — поставки поставщика
+(`related_name="deliveries"`).
+
+### Product — товар
+
+Консольный класс (`models/products.py`) и модель Django (`products/models.py`).
+
+Поля модели:
+* `id` — первичный ключ;
+* `name` — название товара (`CharField`);
+* `price` — цена за единицу (`DecimalField`).
+
+Обратная связь: `product.deliveries.all()` — поставки товара.
+
+### Delivery — поставка
+
+Консольный класс (`models/deliveries.py`) и модель Django (`deliveries/models.py`).
+
+Поля модели:
+* `id` — первичный ключ;
+* `supplier` — внешний ключ на `Supplier` (`on_delete=PROTECT`, `related_name="deliveries"`);
+* `product` — внешний ключ на `Product` (`on_delete=PROTECT`, `related_name="deliveries"`);
+* `quantity` — количество единиц товара (`PositiveIntegerField`);
+* `delivery_date` — дата поставки (`DateField`);
+* `is_paid` — признак оплаты (`BooleanField`, по умолчанию `False`);
+* `is_cancelled` — признак отмены (`BooleanField`, по умолчанию `False`).
+
+Методы модели:
+* `calculate_total_cost()` — расчёт итоговой стоимости поставки;
+* `cancel()` — отмена поставки с сохранением изменения в базе;
+* `__str__()` — строковое представление поставки.
+
+Параметр `on_delete=PROTECT` запрещает удаление поставщика или товара,
+на которых ссылаются поставки: история поставок сохраняется.
+
+## 5. Страницы веб-интерфейса
+
+| Страница | URL | View-функция | Источник данных |
+|----------|-----|--------------|-----------------|
+| Главная | `/` | `homepage.views.index` | — |
+| Список поставок | `/deliveries/` | `deliveries.views.deliveries_list` | ORM: фильтры, поиск, сортировка, пагинация |
+| Поиск по дате | `/deliveries/available/` | `deliveries.views.available_deliveries` | ORM: `filter`, `exclude`, `values_list` |
+| Статистика | `/deliveries/statistics/` | `deliveries.views.statistics` | ORM: `annotate`, `Count`, `Sum`, `Coalesce` |
+| Поставка | `/deliveries/<int:delivery_id>/` | `deliveries.views.delivery_detail` | ORM: `get_object_or_404`, `select_related` |
+| Список поставщиков | `/suppliers/` | `suppliers.views.suppliers_list` | ORM: `all()` |
+| Поставщик | `/suppliers/<int:supplier_id>/` | `suppliers.views.supplier_detail` | ORM: `get_object_or_404` |
+| Список товаров | `/products/` | `products.views.products_list` | ORM: `all()` |
+| Товар | `/products/<int:product_id>/` | `products.views.product_detail` | ORM: `get_object_or_404` |
+
+Если объект с указанным идентификатором не найден, возвращается код статуса 404
+и собственная страница ошибки (`templates/404.html`). Внутренние ошибки сервера
+отображаются через `templates/500.html`.
+
+## 6. Слой данных
+
+### 6.1 Django ORM (ПР9)
+
+Структура базы данных описана моделями Django и управляется миграциями:
+* миграции созданы командами `makemigrations suppliers products deliveries` и применены `migrate`;
+* файлы миграций хранятся в приложениях и включены в репозиторий;
+* целевая база данных — `db.sqlite3` (настройка `DATABASES` по умолчанию); в репозиторий не включается.
+
+Используемые ORM-запросы (не менее 15 различных выражений):
+
+| Категория | Примеры в проекте |
+|-----------|-------------------|
+| Получение наборов | `Delivery.objects.all()`, `Supplier.objects.all()`, `Product.objects.all()` |
+| Получение одного объекта | `get_object_or_404(Delivery.objects.select_related(...), pk=...)` |
+| Фильтрация по одному условию | `filter(delivery_date=selected_date)` |
+| Фильтрация по нескольким условиям | цепочка `filter(...)` по дате, поставщику и товару |
+| Фильтрация по связанной модели | `filter(product__price__gte=price)`, `filter(supplier_id=...)` |
+| Исключение записей | `Supplier.objects.exclude(pk__in=busy_deliveries.values_list("supplier_id", flat=True))` |
+| Поиск по строковому полю | `supplier__name__icontains=query` |
+| Поиск по нескольким полям | `Q(supplier__name__icontains=q) \| Q(product__name__icontains=q)` |
+| Сортировка | `order_by(sort_field, "id")`, в т.ч. по связанному полю `supplier__name` |
+| Связи | `select_related("supplier", "product")`, обратная связь `supplier.deliveries` |
+| Агрегирование | `Count("deliveries", filter=Q(...))`, `Sum(F(...) * F(...), filter=Q(...))`, `Coalesce`, `count()` |
+| Аннотирование | `annotate(supplier_name=F("name"), deliveries_count=..., total_cost=...)` |
+| Постраничный вывод | `Paginator`, `get_page()`, навигация через `{% querystring %}` |
+
+Безопасность запросов:
+* поле сортировки выбирается через словарь разрешённых соответствий `SORT_FIELDS`,
+  произвольный пользовательский ввод в `order_by()` не передаётся;
+* даты и числа, полученные из запроса, проверяются и преобразуются до использования;
+* отсутствующие объекты обрабатываются через `get_object_or_404`, пустые результаты — через `{% empty %}`.
+
+### 6.2 Перенос данных
+
+История переноса данных по этапам проекта:
+1. ПР2–ПР6: данные хранятся в JSON-файлах `data/suppliers.json`, `data/products.json`, `data/deliveries.json`;
+2. ПР7: данные перенесены из JSON в SQLite-базу `data/supplytracker.sqlite` скриптом `db/import_json.py`;
+3. ПР9: данные перенесены из `data/supplytracker.sqlite` в целевую базу Django `db.sqlite3`
+   скриптом `db/import_sqlite_to_orm.py` (`update_or_create`, `transaction.atomic`,
+   сохранение первичных ключей и связей; строки дат `ДД.ММ.ГГГГ` преобразуются в объекты `date`).
+
+Исходная база ПР7 сохранена как источник данных; перед переносом создаётся резервная копия
+`data/supplytracker_backup.sqlite`. Инспекция исходной базы выполняется скриптом
+`db/inspect_source_db.py`.
+
+### 6.3 SQL-слой ПР7 (сохранён как предыдущая реализация)
+
+Файлы SQL-слоя остаются в проекте как предыдущая реализация предметной области;
+представления после ПР9 их не используют:
+* `sql/schema.sql` — скрипт создания таблиц `suppliers`, `products`, `deliveries` с первичными и внешними ключами;
+* `sql/queries.sql` — SQL-запросы проекта (списки, `WHERE`, `JOIN`, агрегатные функции, `GROUP BY`, `HAVING`, параметризованные запросы);
+* `db/database.py` — подключение к SQLite с `PRAGMA foreign_keys = ON`;
+* `db/import_json.py` — однократный перенос данных из JSON в SQLite.
+
+## 7. Шаблоны и статические файлы (ПР6)
+
+* базовый шаблон `templates/base.html` с блоками `{% block title %}` и `{% block content %}`;
+* навигация вынесена в `templates/includes/navigation.html` и подключается через `{% include %}`;
+* дочерние шаблоны наследуют базовый через `{% extends "base.html" %}`;
+* повторяющиеся фрагменты вынесены во включаемые шаблоны (например, `deliveries/includes/delivery_status.html`);
+* данные передаются из представлений через контекст; в шаблонах используются циклы `{% for %}`,
+  условия `{% if %}`, `{% empty %}`, фильтры (`length`, `default`, `date`, `floatformat`);
+* ссылки формируются через именованные маршруты `{% url %}` с пространствами имён приложений;
+* статические файлы приложения `homepage`: `css/style.css`, `js/main.js`, `img/logo.png`,
+  подключаются через `{% load static %}` и `{% static %}`;
+* JavaScript выводит текущий год в подвале страниц.
+
+## 8. Структура проекта
 
 ```text
 supply-tracker/
-├── manage.py                 # точка входа Django
-├── main.py                   # консольная версия приложения (ПР3)
-├── storage.py                # загрузка и сохранение JSON (ПР3)
-├── utils.py                  # функции безопасного ввода (ПР3)
-├── conftest.py               # конфигурация pytest (корень проекта в sys.path)
+├── manage.py                  # точка входа Django
+├── main.py                    # консольная версия приложения (ПР3)
+├── storage.py                 # загрузка и сохранение JSON (ПР3)
+├── utils.py                   # функции безопасного ввода (ПР3)
+├── conftest.py                # конфигурация pytest
 ├── requirements.txt
 ├── README.md
 ├── .flake8
 ├── .gitignore
-│
-├── supplytracker/            # пакет настроек Django-проекта
+├── supplytracker/             # пакет настроек Django-проекта
 │   ├── __init__.py
 │   ├── settings.py
 │   ├── urls.py
 │   ├── asgi.py
 │   └── wsgi.py
-│
-├── templates/                # шаблоны уровня проекта
+├── templates/                 # шаблоны уровня проекта
 │   ├── base.html
 │   ├── 404.html
 │   ├── 500.html
 │   └── includes/
 │       └── navigation.html
-│
-├── homepage/                 # приложение: главная страница и статика
+├── homepage/                  # приложение: главная страница и статика
 │   ├── migrations/
-│   ├── static/
-│   │   └── homepage/
-│   │       ├── css/style.css
-│   │       ├── js/main.js
-│   │       └── img/logo.png
-│   ├── templates/
-│   │   └── homepage/
-│   │       └── index.html
-│   ├── __init__.py
-│   ├── admin.py
-│   ├── apps.py
-│   ├── models.py
-│   ├── tests.py
+│   ├── static/homepage/
+│   │   ├── css/style.css
+│   │   ├── js/main.js
+│   │   └── img/logo.png
+│   ├── templates/homepage/
+│   │   └── index.html
 │   ├── urls.py
 │   └── views.py
-│
-├── deliveries/               # приложение: поставки
+├── deliveries/                # приложение: поставки
 │   ├── migrations/
-│   ├── templates/
-│   │   └── deliveries/
-│   │       ├── delivery_list.html
-│   │       ├── delivery_detail.html
-│   │       ├── available.html
-│   │       ├── statistics.html
-│   │       └── includes/
-│   │           └── delivery_status.html
-│   ├── __init__.py
-│   ├── admin.py
-│   ├── apps.py
-│   ├── models.py
-│   ├── tests.py
+│   │   └── 0001_initial.py
+│   ├── templates/deliveries/
+│   │   ├── delivery_list.html
+│   │   ├── delivery_detail.html
+│   │   ├── available.html
+│   │   ├── statistics.html
+│   │   └── includes/
+│   │       └── delivery_status.html
+│   ├── models.py              # модель Delivery
 │   ├── urls.py
 │   └── views.py
-│
-├── suppliers/                # приложение: поставщики
+├── suppliers/                 # приложение: поставщики
 │   ├── migrations/
-│   ├── templates/
-│   │   └── suppliers/
-│   │       ├── supplier_list.html
-│   │       └── supplier_detail.html
-│   ├── __init__.py
-│   ├── admin.py
-│   ├── apps.py
-│   ├── models.py
-│   ├── tests.py
+│   │   └── 0001_initial.py
+│   ├── templates/suppliers/
+│   │   ├── supplier_list.html
+│   │   └── supplier_detail.html
+│   ├── models.py              # модель Supplier
 │   ├── urls.py
 │   └── views.py
-│
-├── products/                 # приложение: товары
+├── products/                  # приложение: товары
 │   ├── migrations/
-│   ├── templates/
-│   │   └── products/
-│   │       ├── product_list.html
-│   │       └── product_detail.html
-│   ├── __init__.py
-│   ├── admin.py
-│   ├── apps.py
-│   ├── models.py
-│   ├── tests.py
+│   │   └── 0001_initial.py
+│   ├── templates/products/
+│   │   ├── product_list.html
+│   │   └── product_detail.html
+│   ├── models.py              # модель Product
 │   ├── urls.py
 │   └── views.py
-│
-├── models/                   # классы предметной области (ПР3)
+├── models/                    # классы предметной области (ПР3)
 │   ├── __init__.py
 │   ├── suppliers.py
 │   ├── products.py
 │   └── deliveries.py
-│
-├── db/                       # слой подключения к SQLite (ПР7)
+├── db/                        # слой работы с базами данных
 │   ├── __init__.py
-│   ├── database.py
-│   └── import_json.py
-│
-├── sql/                      # SQL-скрипты проекта (ПР7)
+│   ├── database.py            # подключение к SQLite (ПР7)
+│   ├── import_json.py         # перенос JSON → SQLite (ПР7)
+│   ├── inspect_source_db.py   # инспекция исходной базы (ПР9)
+│   └── import_sqlite_to_orm.py# перенос SQLite → Django ORM (ПР9)
+├── sql/                       # SQL-скрипты (ПР7)
 │   ├── schema.sql
 │   └── queries.sql
-│
-├── data/                     # данные приложения
+├── data/                      # данные приложения
 │   ├── suppliers.json
 │   ├── products.json
 │   ├── deliveries.json
-│   └── supplytracker.sqlite
-│
-└── tests/                    # автоматизированные тесты pytest
-    ├── __init__.py
-    ├── test_suppliers.py
-    ├── test_products.py
-    └── test_deliveries.py
+│   ├── supplytracker.sqlite       # исходная база ПР7 (не в репозитории)
+│   └── supplytracker_backup.sqlite# резервная копия (не в репозитории)
+├── tests/                     # автоматизированные тесты pytest
+│   ├── __init__.py
+│   ├── test_suppliers.py
+│   ├── test_products.py
+│   └── test_deliveries.py
+└── db.sqlite3                 # целевая база Django (не в репозитории)
+## 9. Назначение основных модулей
 
-### Структура базы данных
-
-Три таблицы, связанные внешними ключами:
-
-| Таблица | Поля | Ключи |
-|---------|------|-------|
-| `suppliers` | `id INTEGER`, `name TEXT` | `PRIMARY KEY (id)` |
-| `products` | `id INTEGER`, `name TEXT`, `price REAL` | `PRIMARY KEY (id)` |
-| `deliveries` | `id INTEGER`, `supplier_id INTEGER`, `product_id INTEGER`, `quantity INTEGER`, `delivery_date TEXT`, `is_paid INTEGER`, `is_cancelled INTEGER` | `PRIMARY KEY (id)`, `FOREIGN KEY (supplier_id) REFERENCES suppliers(id)`, `FOREIGN KEY (product_id) REFERENCES products(id)` |
-
-### Файлы слоя БД
-
-- `sql/schema.sql` — SQL-скрипт создания таблиц;
-- `sql/queries.sql` — SQL-запросы проекта (13 запросов);
-- `db/database.py` — модуль подключения к SQLite (включает `PRAGMA foreign_keys = ON`);
-- `db/import_json.py` — скрипт однократного переноса данных из JSON;
-- `data/supplytracker.sqlite` — файл базы данных.
-
-### SQL-запросы проекта
-
-В `sql/queries.sql` реализованы запросы всех требуемых видов:
-
-| № | Тип | Назначение |
-|---|-----|-----------|
-| 1 | SELECT | Список всех поставщиков |
-| 2 | SELECT + WHERE | Список товаров дороже 20 руб. |
-| 3 | SELECT + WHERE | Список активных поставок |
-| 4 | SELECT + WHERE | Список отменённых поставок |
-| 5 | JOIN | Полная информация о поставках (3 таблицы) |
-| 6 | JOIN + WHERE | Поставки конкретного поставщика |
-| 7 | GROUP BY | Количество поставок по статусам |
-| 8 | LEFT JOIN + GROUP BY | Количество поставок по поставщикам |
-| 9 | JOIN + SUM + GROUP BY | Общая стоимость по поставщикам |
-| 10 | JOIN + GROUP BY + HAVING | Поставщики с более чем 1 активной поставкой |
-| 11 | NOT IN + параметр `?` | Поиск поставок, не принятых на выбранную дату |
-| 12 | ORDER BY + LIMIT | Топ-3 самых дорогих товаров |
-| 13 | LEFT JOIN + IS NULL | Товары, по которым не было активных поставок |
-
-### Django-интеграция
-
-- В представлениях используется `sqlite3.Row` для доступа к полям по именам;
-- Значения передаются параметрами `?` (безопасные параметризованные запросы);
-- Результаты запросов передаются в шаблоны через `context`.
-
-### Страницы с данными из SQLite
-
-- `/deliveries/` — список поставок (JOIN трёх таблиц);
-- `/deliveries/available/` — поиск по дате (NOT IN + параметр);
-- `/deliveries/statistics/` — статистика (GROUP BY + SUM);
-- `/suppliers/` — список поставщиков;
-- `/products/` — список товаров.
-
-### Импорт данных
-
-Перед первым запуском веб-интерфейса импортируйте данные:
-
-```bash
-python -m db.import_json
+* `main.py` — консольная версия приложения: меню, сценарии работы с объектами;
+* `models/` — классы предметной области ПР3 (`Supplier`, `Product`, `Delivery`) и функции работы с коллекциями;
+* `storage.py` — преобразование JSON ↔ объекты Python;
+* `utils.py` — безопасный консольный ввод чисел, дат и ответов «да/нет»;
+* `supplytracker/` — настройки проекта, корневая маршрутизация, точки входа серверов;
+* `homepage/`, `deliveries/`, `suppliers/`, `products/` — Django-приложения: модели, представления, маршруты и шаблоны соответствующих сущностей;
+* `db/` — скрипты подключения, инспекции и переноса данных между хранилищами;
+* `sql/` — схема базы и SQL-запросы предыдущей реализации (ПР7);
+* `tests/` — тесты классов предметной области.

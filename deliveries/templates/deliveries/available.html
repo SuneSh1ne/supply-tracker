@@ -29,15 +29,13 @@
     <article class="card mb-2">
         <div class="card-body">
             <h5>Поставка #{{ delivery.id }}</h5>
-            <p>Поставщик: {{ delivery.supplier_name }}</p>
-            <p>Товар: {{ delivery.product_name }}</p>
+            <p>Поставщик: {{ delivery.supplier.name }}</p>
+            <p>Товар: {{ delivery.product.name }}</p>
             <p>Количество: {{ delivery.quantity }} шт.</p>
         </div>
     </article>
     {% empty %}
-    <p class="alert alert-info">
-        На эту дату активных поставок нет.
-    </p>
+    <p class="alert alert-info">На эту дату активных поставок нет.</p>
     {% endfor %}
 </div>
 

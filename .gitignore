@@ -19,3 +19,6 @@ Thumbs.db
 # Логи и локальные файлы
 *.log
 .env
+
+db.sqlite3
+data/supplytracker_backup.sqlite
