@@ -6,7 +6,7 @@ class Supplier(models.Model):
     """Поставщик товаров."""
 
     name = models.CharField(
-        max_length=200,
+        max_length=210,
         verbose_name="Название",
     )
 

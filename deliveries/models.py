@@ -5,6 +5,33 @@ from products.models import Product
 from suppliers.models import Supplier
 
 
+class DeliveryQuerySet(models.QuerySet):
+    """Набор запросов для работы с поставками."""
+
+    def active(self):
+        return self.filter(status=self.model.Status.ACTIVE)
+
+    def cancelled(self):
+        return self.filter(status=self.model.Status.CANCELLED)
+
+    def completed(self):
+        return self.filter(status=self.model.Status.COMPLETED)
+
+    def cancel(self):
+        """Отменить поставку."""
+        self.status = self.Status.CANCELLED
+        self.save(update_fields=["status"])
+
+    def complete(self):
+        """Завершить поставку."""
+        self.status = self.Status.COMPLETED
+        self.save(update_fields=["status"])
+
+
+class DeliveryManager(models.Manager.from_queryset(DeliveryQuerySet)):
+    """Менеджер модели Delivery с дополнительными методами."""
+
+
 class Delivery(models.Model):
     """Поставка товара от поставщика."""
 
@@ -23,7 +50,19 @@ class Delivery(models.Model):
     quantity = models.PositiveIntegerField(verbose_name="Количество")
     delivery_date = models.DateField(verbose_name="Дата поставки")
     is_paid = models.BooleanField(default=False, verbose_name="Оплачено")
-    is_cancelled = models.BooleanField(default=False, verbose_name="Отменена")
+    objects = DeliveryManager()
+
+    class Status(models.TextChoices):
+        ACTIVE = "active", "Активна"
+        CANCELLED = "cancelled", "Отменена"
+        COMPLETED = "completed", "Завершена"
+
+    status = models.CharField(
+        max_length=12,
+        choices=Status.choices,
+        default=Status.ACTIVE,
+        verbose_name="Статус поставки",
+    )
 
     class Meta:
         ordering = ["delivery_date", "id"]

@@ -108,10 +108,7 @@ def available_deliveries(request):
         except ValueError:
             error = "Некорректная дата: введите в формате ДД.ММ.ГГГГ."
         else:
-            busy_deliveries = Delivery.objects.filter(
-                delivery_date=selected_date,
-                is_cancelled=False,
-            )
+            busy_deliveries = Delivery.objects.active().for_date(selected_date)
             deliveries_on_date = busy_deliveries.select_related(
                 "supplier", "product"
             ).order_by("id")
@@ -134,7 +131,7 @@ def statistics(request):
         supplier_name=F("name"),
         deliveries_count=Count(
             "deliveries",
-            filter=Q(deliveries__is_cancelled=False),
+            filter=Q(deliveries__status=Delivery.Status.ACTIVE),
         ),
         total_cost=Coalesce(
             Sum(

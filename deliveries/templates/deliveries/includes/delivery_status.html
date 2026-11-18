@@ -1,6 +1,10 @@
-{% if delivery.is_cancelled %}
+{% if delivery.status == delivery.Status.CANCELLED %}
 <span class="badge bg-secondary delivery-status delivery-status-cancelled">
     Отменена
+</span>
+{% elif delivery.status == delivery.Status.COMPLETED %}
+<span class="badge bg-info text-dark delivery-status delivery-status-completed">
+    Завершена
 </span>
 {% elif not delivery.is_paid %}
 <span class="badge bg-warning text-dark delivery-status delivery-status-pending">

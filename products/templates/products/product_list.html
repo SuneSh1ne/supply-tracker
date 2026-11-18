@@ -16,7 +16,7 @@
                 {{ product.name|default:"Без названия" }}
             </h2>
             <p class="card-text">Цена: {{ product.price }} руб.</p>
-            <a href="{% url 'products:detail' product.id %}" class="btn btn-primary">
+            <a href="{{ product.get_absolute_url }}" class="btn btn-primary">
                 Подробнее
             </a>
         </div>

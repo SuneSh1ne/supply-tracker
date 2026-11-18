@@ -22,3 +22,4 @@ Thumbs.db
 
 db.sqlite3
 data/supplytracker_backup.sqlite
+db_backup_pr10.sqlite

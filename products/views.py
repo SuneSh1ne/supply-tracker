@@ -14,9 +14,9 @@ def products_list(request):
     )
 
 
-def product_detail(request, product_id):
+def product_detail(request, slug):
     """Страница товара."""
-    product = get_object_or_404(Product, pk=product_id)
+    product = get_object_or_404(Product, slug=slug)
     return render(
         request,
         "products/product_detail.html",
